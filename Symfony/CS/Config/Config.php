@@ -26,6 +26,7 @@ class Config implements ConfigInterface
     protected $finder;
     protected $fixers;
     protected $dir;
+    protected $customFixers;
 
     public function __construct($name = 'default', $description = 'A default configuration')
     {
@@ -33,6 +34,7 @@ class Config implements ConfigInterface
         $this->description = $description;
         $this->fixers = FixerInterface::ALL_LEVEL;
         $this->finder = new DefaultFinder();
+        $this->customFixers = array();
     }
 
     public static function create()
@@ -59,7 +61,7 @@ class Config implements ConfigInterface
 
     public function getFinder()
     {
-        if ($this->finder instanceof FinderInterface) {
+        if ($this->finder instanceof FinderInterface && $this->dir !== null) {
             $this->finder->setDir($this->dir);
         }
 
@@ -86,5 +88,17 @@ class Config implements ConfigInterface
     public function getDescription()
     {
         return $this->description;
+    }
+
+    public function addCustomFixer(FixerInterface $fixer)
+    {
+        $this->customFixers[] = $fixer;
+
+        return $this;
+    }
+
+    public function getCustomFixers()
+    {
+        return $this->customFixers;
     }
 }

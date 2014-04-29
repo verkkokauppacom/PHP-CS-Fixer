@@ -11,16 +11,16 @@
 
 namespace Symfony\CS\Tests\Fixer;
 
-use Symfony\CS\Fixer\PhpClosingTagFixer;
+use Symfony\CS\Fixer\ShortTagFixer;
 
-class PhpClosingTagFixerTest extends \PHPUnit_Framework_TestCase
+class ShortTagFixerTest extends \PHPUnit_Framework_TestCase
 {
     /**
      * @dataProvider provideClosingTagExamples
      */
     public function testOneLineFix($expected, $input)
     {
-        $fixer = new PhpClosingTagFixer();
+        $fixer = new ShortTagFixer();
         $file = new \SplFileInfo(__FILE__);
 
         $this->assertEquals($expected, $fixer->fix($file, $input));
@@ -29,8 +29,8 @@ class PhpClosingTagFixerTest extends \PHPUnit_Framework_TestCase
     public function provideClosingTagExamples()
     {
         return array(
-            array('<?php echo \'Foo\';', '<?php echo \'Foo\'; ?>'),
-            array('<?php echo \'Foo\';', '<?php echo \'Foo\';?>'),
+            array('<?php echo \'Foo\';', '<? echo \'Foo\';'),
+	    array('<?= echo \'Foo\';', '<?= echo \'Foo\';'),
             array('<?php echo \'Foo\'; ?> PLAIN TEXT', '<?php echo \'Foo\'; ?> PLAIN TEXT'),
             array('PLAIN TEXT<?php echo \'Foo\'; ?>', 'PLAIN TEXT<?php echo \'Foo\'; ?>'),
             array('<?php
@@ -38,22 +38,11 @@ class PhpClosingTagFixerTest extends \PHPUnit_Framework_TestCase
 echo \'Foo\';
 
 ',
-                  '<?php
+                  '<?
 
 echo \'Foo\';
 
-?>
-    ',
-            ),
-            array('<?php echo \'Foo\'; ?>
-<p><?php echo \'this is a template\'; ?></p>
-<?php echo \'Foo\'; ?>
-',
-                  '<?php echo \'Foo\'; ?>
-<p><?php echo \'this is a template\'; ?></p>
-<?php echo \'Foo\'; ?>
-',
-            ),
+')
         );
     }
 }

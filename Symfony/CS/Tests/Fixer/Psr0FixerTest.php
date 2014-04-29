@@ -61,6 +61,44 @@ EOF;
         $this->assertEquals($expected, $fixer->fix($file, $input));
     }
 
+    public function testFixAbstractClassName()
+    {
+        $fixer = new Psr0Fixer();
+        $file = new \SplFileInfo(__DIR__.'/../../Fixer/Psr0Fixer.php');
+
+        $expected = <<<'EOF'
+namespace Symfony\CS\Fixer;
+abstract class Psr0Fixer {}
+/* class foo */
+EOF;
+        $input = <<<'EOF'
+namespace Symfony\CS\Fixer;
+abstract class blah {}
+/* class foo */
+EOF;
+
+        $this->assertEquals($expected, $fixer->fix($file, $input));
+    }
+
+    public function testFixFinalClassName()
+    {
+        $fixer = new Psr0Fixer();
+        $file = new \SplFileInfo(__DIR__.'/../../Fixer/Psr0Fixer.php');
+
+        $expected = <<<'EOF'
+namespace Symfony\CS\Fixer;
+final class Psr0Fixer {}
+/* class foo */
+EOF;
+        $input = <<<'EOF'
+namespace Symfony\CS\Fixer;
+final class blah {}
+/* class foo */
+EOF;
+
+        $this->assertEquals($expected, $fixer->fix($file, $input));
+    }
+
     public function testFixNamespaceThrows()
     {
         $fixer = new Psr0Fixer();
@@ -142,5 +180,39 @@ EOF;
         ob_start();
         $this->assertEquals($expected, $fixer->fix($file, $input));
         $this->assertEquals('', ob_get_clean());
+    }
+
+    public function testLeadingSpaceNamespaceThrows()
+    {
+        $fixer = new Psr0Fixer();
+        $file = new \SplFileInfo(__DIR__.'/../../Fixer/Psr0Fixer.php');
+
+        $input = <<<'EOF'
+ namespace LeadingSpace;
+class Psr0Fixer {}
+EOF;
+
+        $expected = '! The namespace LeadingSpace in';
+        ob_start();
+        $fixer->fix($file, $input);
+        $this->assertContains($expected, ob_get_clean());
+    }
+
+    public function testFixLeadingSpaceNamespace()
+    {
+        $fixer = new Psr0Fixer();
+        $file = new \SplFileInfo(__DIR__.'/../../Fixer/Psr0Fixer.php');
+
+        $expected = <<<'EOF'
+namespace LeadingSpace;
+class Psr0Fixer {}
+EOF;
+        $input = <<<'EOF'
+ namespace LeadingSpace;
+class Psr0Fixer {}
+EOF;
+        ob_start();
+        $this->assertEquals($expected, $fixer->fix($file, $input));
+        ob_clean();
     }
 }

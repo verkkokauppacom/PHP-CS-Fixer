@@ -10,11 +10,11 @@
         }
     ],
     "require": {
-        "php": ">=5.3.3",
-        "symfony/console": "2.1.*",
-        "symfony/filesystem": "2.1.*",
-        "symfony/finder": "2.1.*",
-        "squizlabs/php_codesniffer": "1.4.*"
+        "php": ">=5.3.6",
+        "symfony/console": "~2.1",
+        "symfony/filesystem": "~2.1",
+        "symfony/finder": "~2.1",
+        "sebastian/diff": "1.1.*"
     },
     "autoload": {
         "psr-0": { "Symfony\\CS": "." }
@@ -22,7 +22,7 @@
     "bin": ["php-cs-fixer"],
     "extra": {
         "branch-alias": {
-            "dev-master": "0.1.x-dev"
+            "dev-master": "0.4.x-dev"
         }
     }
 }

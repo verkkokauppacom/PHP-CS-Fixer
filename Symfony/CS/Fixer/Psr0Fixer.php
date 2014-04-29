@@ -25,15 +25,30 @@ class Psr0Fixer implements FixerInterface, ConfigAwareInterface
     public function fix(\SplFileInfo $file, $content)
     {
         $namespace = false;
-        if (preg_match('{^namespace\s+(\S+)\s*;}um', $content, $match)) {
+        if (preg_match('{^[^\S\n]*(?:<\?php\s+)?namespace\s+(\S+)\s*;}um', $content, $match)) {
             $namespace = $match[1];
+            if (stripos($match[0], 'namespace') > 0) {
+                $content = str_replace($match[0], ltrim($match[0], " \t"), $content);
+            }
         }
-        if (!preg_match('{^(class|interface|trait)\s+(\S+)}um', $content, $match)) {
+
+        if (!preg_match_all('{^((abstract\s+|final\s+)?class|interface|trait)\s+(\S+)}um', $content, $matches, PREG_SET_ORDER)) {
             return $content;
         }
 
+        // no classes?
+        if (!$matches) {
+            return $content;
+        }
+
+        if (count($matches) > 1) {
+            return $content;
+        }
+
+        $match = $matches[0];
+
         $keyword = $match[1];
-        $class = $match[2];
+        $class = $match[3];
 
         if ($namespace) {
             $normNamespace = strtr($namespace, '\\', '/');
@@ -110,8 +125,8 @@ class Psr0Fixer implements FixerInterface, ConfigAwareInterface
             return false;
         }
 
-        // ignore tests/stubs/fixtures, since they are typically containing invalid files for various reasons
-        return !preg_match('{[/\\\\](test|stub|fixture)s?[/\\\\]}i', $file->getRealPath());
+        // ignore stubs/fixtures, since they are typically containing invalid files for various reasons
+        return !preg_match('{[/\\\\](stub|fixture)s?[/\\\\]}i', $file->getRealPath());
     }
 
     public function getName()

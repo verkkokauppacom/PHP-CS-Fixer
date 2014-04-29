@@ -13,22 +13,36 @@ namespace Symfony\CS;
 
 use Symfony\Component\Finder\Finder;
 use Symfony\Component\Finder\SplFileInfo as FinderSplFileInfo;
+use SebastianBergmann\Diff\Differ;
 
 /**
  * @author Fabien Potencier <fabien@symfony.com>
  */
 class Fixer
 {
-    const VERSION = '0.2';
+    const VERSION = '0.4-DEV';
 
     protected $fixers = array();
     protected $configs = array();
+    protected $diff;
+
+    public function __construct()
+    {
+        $this->diff = new Differ();
+    }
 
     public function registerBuiltInFixers()
     {
         foreach (Finder::create()->files()->in(__DIR__.'/Fixer') as $file) {
             $class = 'Symfony\\CS\\Fixer\\'.basename($file, '.php');
             $this->addFixer(new $class());
+        }
+    }
+
+    public function registerCustomFixers($fixers)
+    {
+        foreach ($fixers as $fixer) {
+            $this->addFixer($fixer);
         }
     }
 
@@ -67,8 +81,9 @@ class Fixer
      *
      * @param ConfigInterface $config A ConfigInterface instance
      * @param Boolean         $dryRun Whether to simulate the changes or not
+     * @param Boolean         $diff   Whether to provide diff
      */
-    public function fix(ConfigInterface $config, $dryRun = false)
+    public function fix(ConfigInterface $config, $dryRun = false, $diff = false)
     {
         $this->sortFixers();
 
@@ -79,11 +94,11 @@ class Fixer
                 continue;
             }
 
-            if ($appliedFixers = $this->fixFile($file, $fixers, $dryRun)) {
+            if ($fixInfo = $this->fixFile($file, $fixers, $dryRun, $diff)) {
                 if ($file instanceof FinderSplFileInfo) {
-                    $changed[$file->getRelativePathname()] = $appliedFixers;
+                    $changed[$file->getRelativePathname()] = $fixInfo;
                 } else {
-                    $changed[$file->getPathname()] = $appliedFixers;
+                    $changed[$file->getPathname()] = $fixInfo;
                 }
             }
         }
@@ -91,7 +106,7 @@ class Fixer
         return $changed;
     }
 
-    public function fixFile(\SplFileInfo $file, array $fixers, $dryRun)
+    public function fixFile(\SplFileInfo $file, array $fixers, $dryRun, $diff)
     {
         $new = $old = file_get_contents($file->getRealpath());
         $appliedFixers = array();
@@ -113,7 +128,13 @@ class Fixer
                 file_put_contents($file->getRealpath(), $new);
             }
 
-            return $appliedFixers;
+            $fixInfo = array('appliedFixers' => $appliedFixers);
+
+            if ($diff) {
+                $fixInfo['diff'] = $this->stringDiff($old, $new);
+            }
+
+            return $fixInfo;
         }
     }
 
@@ -132,6 +153,25 @@ class Fixer
         }
 
         return 'all';
+    }
+
+    protected function stringDiff($old, $new)
+    {
+        $diff = $this->diff->diff($old, $new);
+
+        $diff = implode(PHP_EOL, array_map(function ($string) {
+            $string = preg_replace('/^(\+){3}/', '<info>+++</info>', $string);
+            $string = preg_replace('/^(\+){1}/', '<info>+</info>', $string);
+
+            $string = preg_replace('/^(\-){3}/', '<error>---</error>', $string);
+            $string = preg_replace('/^(\-){1}/', '<error>-</error>', $string);
+
+            $string = str_repeat(' ', 6) . $string;
+
+            return $string;
+        }, explode(PHP_EOL, $diff)));
+
+        return $diff;
     }
 
     private function sortFixers()

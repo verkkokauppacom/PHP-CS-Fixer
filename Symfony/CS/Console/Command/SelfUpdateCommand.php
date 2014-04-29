@@ -18,6 +18,7 @@ use Symfony\Component\Console\Output\OutputInterface;
 /**
  * @author Igor Wiedler <igor@wiedler.ch>
  * @author Stephane PY <py.stephane1@gmail.com>
+ * @author Grégoire Pineau <lyrixx@lyrixx.info>
  */
 class SelfUpdateCommand extends Command
 {
@@ -28,12 +29,13 @@ class SelfUpdateCommand extends Command
     {
         $this
             ->setName('self-update')
+            ->setAliases(array('selfupdate'))
             ->setDescription('Update php-cs-fixer.phar to the latest version.')
             ->setHelp(<<<EOT
-The <info>self-update</info> command replace your php-cs-fixer.phar
-by the latest version from cs.sensiolabs.org.
+The <info>%command.name%</info> command replace your php-cs-fixer.phar by the
+latest version from cs.sensiolabs.org.
 
-<info>php php-cs-fixer.phar self-update</info>
+<info>php php-cs-fixer.phar %command.name%</info>
 
 EOT
             )
@@ -45,9 +47,25 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $remoteFilename = "http://cs.sensiolabs.org/get/php-cs-fixer.phar";
-        $localFilename  = $_SERVER['argv'][0];
-        $tempFilename   = basename($localFilename, '.phar').'-temp.phar';
+        preg_match('/\((.*?)\)$/', $this->getApplication()->getLongVersion(), $match);
+        $localVersion = isset($match[1]) ? $match[1] : '';
+
+        if (false !== $remoteVersion = @file_get_contents('http://get.sensiolabs.org/php-cs-fixer.version')) {
+            if ($localVersion == $remoteVersion) {
+                $output->writeln('<info>php-cs-fixer is already up to date.</info>');
+
+                return;
+            }
+        }
+
+        $remoteFilename = 'http://get.sensiolabs.org/php-cs-fixer.phar';
+        $localFilename = $_SERVER['argv'][0];
+        $tempFilename = basename($localFilename, '.phar').'-tmp.phar';
+        if (false === @file_get_contents($remoteFilename)) {
+            $output->writeln('<error>Unable to download new versions from the server.</error>');
+
+            return 1;
+        }
 
         try {
             copy($remoteFilename, $tempFilename);
@@ -58,15 +76,17 @@ EOT
             // free the variable to unlock the file
             unset($phar);
             rename($tempFilename, $localFilename);
+
+            $output->writeln('<info>php-cs-fixer updated.</info>');
         } catch (\Exception $e) {
             if (!$e instanceof \UnexpectedValueException && !$e instanceof \PharException) {
                 throw $e;
             }
             unlink($tempFilename);
-            $output->writeln('<error>The download is corrupt ('.$e->getMessage().').</error>');
+            $output->writeln(sprintf('<error>The download is corrupt (%s).</error>', $e->getMessage()));
             $output->writeln('<error>Please re-run the self-update command to try again.</error>');
-        }
 
-        $output->writeln("<info>php-cs-fixer updated.</info>");
+            return 1;
+        }
     }
 }

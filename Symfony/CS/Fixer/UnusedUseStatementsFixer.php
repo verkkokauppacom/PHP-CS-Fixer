@@ -26,7 +26,7 @@ class UnusedUseStatementsFixer implements FixerInterface
         }
 
         // [Structure] remove unused use statements
-        preg_match_all('/^use (?P<class>[^\s;]+)(?:\s+as\s+(?P<alias>.*))?;/m', $content, $matches, PREG_SET_ORDER);
+        preg_match_all('/^use (?P<class>[^\s;]+)(?:\s+as\s+(?P<alias>[^\s;]+))?\s*;/m', $content, $matches, PREG_SET_ORDER);
         foreach ($matches as $match) {
             if (isset($match['alias'])) {
                 $short = $match['alias'];
@@ -35,8 +35,25 @@ class UnusedUseStatementsFixer implements FixerInterface
                 $short = array_pop($parts);
             }
 
-            preg_match_all('/\b'.preg_quote($short, '/').'\b/i', str_replace($match[0]."\n", '', $content), $m);
-            if (!count($m[0])) {
+            $removed = false;
+
+            // if the namespace is the same as the current one, the use statement can be safely removed
+            // but only is there is no aliases
+            if (!isset($match['alias']) && preg_match('{^[^\S\n]*(?:<\?php\s+)?namespace\s+(\S+)\s*;}um', $content, $lmatch)) {
+                $namespace = $lmatch[1];
+
+                if (preg_match('{^'.str_replace('\\', '\\\\', $namespace).'\\\\[^\\\\]+$}', trim($match['class'], '\\'))) {
+                    $removed = true;
+                }
+            }
+
+            // if not used, the use statement can be safely removed
+            if (!$removed) {
+                preg_match_all('/\b'.preg_quote($short, '/').'\b/i', str_replace($match[0]."\n", '', $content), $m);
+                $removed = !count($m[0]);
+            }
+
+            if ($removed) {
                 $content = str_replace($match[0]."\n", '', $content);
             }
         }

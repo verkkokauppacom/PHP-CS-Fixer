@@ -28,6 +28,23 @@ use SomeClass;
 $a = new Bar();
 $a = new FooBaz();
 $a = new someclass();
+
+use Symfony\Annotation\Template;
+use Symfony\Doctrine\Entities\Entity;
+use Symfony\Array\ArrayInterface;
+
+class AnnotatedClass
+{
+    /**
+     * @Template(foobar=21)
+     * @param Entity $foo
+     */
+    public function doSomething($foo)
+    {
+        $bar = $foo->toArray();
+        /** @var ArrayInterface $bar */
+    }
+}
 EOF;
 
         $input = <<<'EOF'
@@ -41,6 +58,79 @@ use SomeClass;
 $a = new Bar();
 $a = new FooBaz();
 $a = new someclass();
+
+use Symfony\Annotation\Template;
+use Symfony\Doctrine\Entities\Entity;
+use Symfony\Array\ArrayInterface;
+
+class AnnotatedClass
+{
+    /**
+     * @Template(foobar=21)
+     * @param Entity $foo
+     */
+    public function doSomething($foo)
+    {
+        $bar = $foo->toArray();
+        /** @var ArrayInterface $bar */
+    }
+}
+EOF;
+
+        $this->assertEquals($expected, $fixer->fix($file, $input));
+    }
+
+    public function testFixUseInTheSameNamespace()
+    {
+        $fixer = new UnusedUseStatementsFixer();
+        $file = new \SplFileInfo(__FILE__);
+
+        $expected = <<<'EOF'
+namespace Foo\Bar\FooBar;
+
+use Foo\Bar\FooBar\Foo as Fooz;
+
+$a = new Baz();
+$b = new Fooz();
+$c = new Bar\Fooz();
+EOF;
+
+        $input = <<<'EOF'
+namespace Foo\Bar\FooBar;
+
+use Foo\Bar\FooBar\Baz;
+use Foo\Bar\FooBar\Foo as Fooz;
+use Foo\Bar\FooBar\Bar;
+
+$a = new Baz();
+$b = new Fooz();
+$c = new Bar\Fooz();
+EOF;
+
+        $this->assertEquals($expected, $fixer->fix($file, $input));
+    }
+
+    public function testTrailingSpaces()
+    {
+        $fixer = new UnusedUseStatementsFixer();
+        $file = new \SplFileInfo(__FILE__);
+
+        $expected = <<<'EOF'
+use Foo\Bar ;
+use Foo\Bar\FooBar as FooBaz ;
+
+$a = new Bar();
+$a = new FooBaz();
+EOF;
+
+        $input = <<<'EOF'
+use Foo\Bar ;
+use Foo\Bar\FooBar as FooBaz ;
+use Foo\Bar\Foo as Fooo ;
+use SomeClass ;
+
+$a = new Bar();
+$a = new FooBaz();
 EOF;
 
         $this->assertEquals($expected, $fixer->fix($file, $input));
