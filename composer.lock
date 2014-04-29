@@ -1,72 +1,59 @@
 {
-    "hash": "69ad716a8b5d59ececbf48d8b3ae5ceb",
+    "_readme": [
+        "This file locks the dependencies of your project to a known state",
+        "Read more about it at http://getcomposer.org/doc/01-basic-usage.md#composer-lock-the-lock-file"
+    ],
+    "hash": "b6a7c6b4af60e69dac88d6934d8f30ec",
     "packages": [
         {
-            "name": "squizlabs/php_codesniffer",
-            "version": "1.4.4",
+            "name": "sebastian/diff",
+            "version": "1.1.0",
             "source": {
                 "type": "git",
-                "url": "https://github.com/squizlabs/PHP_CodeSniffer",
-                "reference": "1.4.4"
+                "url": "https://github.com/sebastianbergmann/diff.git",
+                "reference": "1e091702a5a38e6b4c1ba9ca816e3dd343df2e2d"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/squizlabs/PHP_CodeSniffer/zipball/1.4.4",
-                "reference": "1.4.4",
+                "url": "https://api.github.com/repos/sebastianbergmann/diff/zipball/1e091702a5a38e6b4c1ba9ca816e3dd343df2e2d",
+                "reference": "1e091702a5a38e6b4c1ba9ca816e3dd343df2e2d",
                 "shasum": ""
             },
             "require": {
-                "php": ">=5.1.2"
+                "php": ">=5.3.3"
             },
-            "bin": [
-                "scripts/phpcs"
-            ],
             "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.1-dev"
+                }
+            },
             "autoload": {
                 "classmap": [
-                    "CodeSniffer.php",
-                    "CodeSniffer/CLI.php",
-                    "CodeSniffer/Exception.php",
-                    "CodeSniffer/File.php",
-                    "CodeSniffer/MultiFileSniff.php",
-                    "CodeSniffer/Report.php",
-                    "CodeSniffer/Reporting.php",
-                    "CodeSniffer/Sniff.php",
-                    "CodeSniffer/Tokens.php",
-                    "CodeSniffer/Reports/",
-                    "CodeSniffer/CommentParser/",
-                    "CodeSniffer/Tokenizers/",
-                    "CodeSniffer/DocGenerators/",
-                    "CodeSniffer/Standards/AbstractPatternSniff.php",
-                    "CodeSniffer/Standards/AbstractScopeSniff.php",
-                    "CodeSniffer/Standards/AbstractVariableSniff.php",
-                    "CodeSniffer/Standards/IncorrectPatternException.php",
-                    "CodeSniffer/Standards/Generic/Sniffs/",
-                    "CodeSniffer/Standards/MySource/Sniffs/",
-                    "CodeSniffer/Standards/PEAR/Sniffs/",
-                    "CodeSniffer/Standards/PSR1/Sniffs/",
-                    "CodeSniffer/Standards/PSR2/Sniffs/",
-                    "CodeSniffer/Standards/Squiz/Sniffs/",
-                    "CodeSniffer/Standards/Zend/Sniffs/"
+                    "src/"
                 ]
             },
-            "notification-url": "http://packagist.org/downloads/",
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "BSD-3-Clause"
             ],
             "authors": [
                 {
-                    "name": "Greg Sherwood",
+                    "name": "Sebastian Bergmann",
+                    "email": "sebastian@phpunit.de",
                     "role": "lead"
+                },
+                {
+                    "name": "Kore Nordmann",
+                    "email": "mail@kore-nordmann.de"
                 }
             ],
-            "description": "PHP_CodeSniffer tokenises PHP, JavaScript and CSS files and detects violations of a defined set of coding standards.",
-            "homepage": "http://www.squizlabs.com/php-codesniffer",
+            "description": "Diff implementation",
+            "homepage": "http://www.github.com/sebastianbergmann/diff",
             "keywords": [
-                "phpcs",
-                "standards"
+                "diff"
             ],
-            "time": "2013-02-06 23:11:59"
+            "time": "2013-08-03 16:46:33"
         },
         {
             "name": "symfony/console",
@@ -195,12 +182,20 @@
             "time": "2013-01-09 08:51:07"
         }
     ],
-    "packages-dev": null,
+    "packages-dev": [
+
+    ],
     "aliases": [
 
     ],
     "minimum-stability": "stable",
     "stability-flags": [
+
+    ],
+    "platform": {
+        "php": ">=5.3.6"
+    },
+    "platform-dev": [
 
     ]
 }
