@@ -3,6 +3,7 @@
     "type": "application",
     "description": "A script to automatically fix Symfony Coding Standard",
     "license": "MIT",
+    "minimum-stability": "dev",
     "authors": [
         {
             "name": "Fabien Potencier",
